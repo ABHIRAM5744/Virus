@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIRUS // Voice SOC</title>
+<link rel="stylesheet" href="/static/css/hud.css">
+</head>
+<body>
+<canvas id="scene"></canvas>
+<canvas id="flat"></canvas>
+<div class="scan"></div>
+
+<div id="hud">
+  <header>
+    <div class="brand"><span class="logo">V</span><div><b>VIRUS</b><small>VOICE SECURITY OPS CENTRE</small></div></div>
+    <div class="pills">
+      <span class="pill live" title="Every event comes from a live source: public threat feeds, this machine, your assets, honeypot">● LIVE DATA</span>
+      <span class="pill" id="p-gnani"><i></i>GNANI</span>
+      <span class="pill" id="p-groq"><i></i>GROQ</span>
+      <span class="pill" id="p-gemini"><i></i>GEMINI</span>
+      <span class="pill" id="p-claude"><i></i>CLAUDE</span>
+      <span class="pill" id="p-openrouter"><i></i>FREE</span>
+    </div>
+    <div class="risk">
+      <div class="risk-label">THREAT LEVEL <b id="risk-val">--</b></div>
+      <div class="risk-bar"><div id="risk-fill"></div></div>
+    </div>
+    <div class="tools">
+      <label class="tog"><input type="checkbox" id="t-voice" checked><span>Auto-alert voice</span></label>
+      <label class="tog"><input type="checkbox" id="t-rot" checked><span>Auto-rotate</span></label>
+      <button class="btn" id="btn-toolbox" title="Live security tools">TOOLBOX</button>
+      <button class="btn" id="btn-snap" title="Save a PNG of the globe">SNAP</button>
+      <span id="clock"></span>
+    </div>
+  </header>
+
+  <div id="layers">
+    <div class="seg"><button data-view="realistic" title="NASA-based realistic earth with live day/night">Realistic 3D</button><button data-view="tactical" title="Wireframe HUD look">Tactical</button><button data-view="flat" title="Normal flat 2D map">Flat map</button></div>
+    <div class="lyr">
+      <button data-layer="sats">Satellites</button><button data-layer="aircraft">Aircraft</button><button data-layer="quakes">Quakes</button>
+      <button data-layer="sightings">Global attacks</button><button data-layer="flows">Flows</button><button data-layer="clouds">Clouds</button><button data-layer="daynight">Day/Night</button>
+    </div>
+    <div id="live-status"></div>
+  </div>
+
+  <aside id="left" class="panel">
+    <h3>LIVE THREAT FEED <small id="count"></small></h3>
+    <div id="srcs" class="srcs"></div>
+    <div class="chips" id="sev-chips"></div>
+    <div id="feed"></div>
+  </aside>
+
+  <aside id="right">
+    <div class="panel" id="pending-card" hidden>
+      <h3>ACTION REQUIRED</h3>
+      <div id="pending-body"></div>
+      <div class="row"><button class="btn danger" id="p-yes">Approve</button><button class="btn" id="p-no">Dismiss</button></div>
+      <small class="hint">or say “yes, block it” / “haan, block karo”</small>
+    </div>
+    <div class="panel" id="inspector">
+      <h3>NODE INSPECTOR</h3>
+      <div id="node-body" class="muted">Click a node on the globe, or say “focus on the database”.</div>
+    </div>
+    <div class="panel">
+      <h3>AI COUNCIL <small>three models vote</small></h3>
+      <div id="ev-detail" class="muted" style="margin-bottom:8px"></div>
+      <div class="row" style="margin:0 0 8px"><button class="btn" id="btn-council" disabled>Convene council</button><button class="btn" id="btn-report">Incident report</button></div>
+      <div id="council" class="muted">Select an event in the feed, then convene the council.</div>
+    </div>
+    <div class="panel" id="gpanel">
+      <h3>GLOBAL ATTACK PULSE <small>seen worldwide · live</small></h3>
+      <div class="gstat"><div><b id="g-total">0</b><small>sightings</small></div><div><b id="g-1h">0</b><small>last hour</small></div></div>
+      <div class="sub">TOP ORIGINS (last hour)</div><div id="g-top"></div>
+      <div class="sub">ATTACK FLOWS · ORIGIN → TARGET</div><div id="g-flows"></div><small class="hint" id="g-flows-note"></small>
+    </div>
+    <div class="panel stats">
+      <div><b id="s-total">0</b><small>events</small></div>
+      <div><b id="s-blocked">0</b><small>sources up</small></div>
+      <div><b id="s-comp">0</b><small>critical</small></div>
+      <div><b id="s-iso">0</b><small>IPs blocked</small></div>
+    </div>
+  </aside>
+
+  <footer>
+    <div id="convo"></div>
+    <div class="dock">
+      <select id="lang" title="Spoken language"></select>
+      <div class="mic-wrap">
+        <canvas id="ring" width="220" height="220"></canvas>
+        <button id="mic" aria-label="Talk to VIRUS"><svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg></button>
+      </div>
+      <form id="txt-form"><input id="txt" placeholder="Type or press space to talk…" autocomplete="off"><button class="btn" type="submit">Send</button></form>
+    </div>
+    <div class="quick" id="quick"></div>
+    <div id="status">Ready</div>
+  </footer>
+</div>
+
+<div id="toolbox" class="panel" hidden>
+  <h3>TOOLBOX <small>live lookups</small><button class="btn" id="tb-close">✕</button></h3>
+  <div id="tb-tabs" class="chips"></div>
+  <form id="tb-form" class="row" style="margin:0 0 6px"><input id="tb-in" autocomplete="off" spellcheck="false"><button class="btn" type="submit">Run</button></form>
+  <small id="tb-desc" class="hint"></small>
+  <div id="tb-out" class="muted">Pick a tool and press Run.</div>
+  <button class="btn" id="tb-ai" hidden>Explain with AI</button><pre id="tb-ai-out"></pre>
+</div>
+
+<div id="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head"><b>INCIDENT REPORT</b><small id="rep-prov"></small>
+      <span><button class="btn" id="rep-speak">Read summary</button><button class="btn" id="rep-dl">Download .md</button><button class="btn" id="rep-close">Close</button></span></div>
+    <div id="rep-body"></div>
+  </div>
+</div>
+
+<script src="/static/vendor/three.min.js"></script>
+<script src="/static/vendor/satellite.min.js"></script>
+<script src="/static/js/hud.js"></script>
+<script src="/static/js/earth.js"></script>
+<script src="/static/js/models.js"></script>
+<script src="/static/js/flatmap.js"></script>
+<script src="/static/js/toolbox.js"></script>
+</body>
+</html>

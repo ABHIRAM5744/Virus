@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: virus-voice-soc
+    runtime: python
+    plan: free            # free sleeps after ~15 min idle; use "starter" for an always-on demo
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app -c gunicorn.conf.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: APP_PASSWORD          # protects the whole site with a login prompt (user: anything)
+        generateValue: true
+      - key: INGEST_TOKEN
+        generateValue: true
+      - key: HOME_LAT
+        value: "25.2"
+      - key: HOME_LON
+        value: "55.27"
+      - key: HOME_CITY
+        value: "Dubai"
+      # Secrets: fill these in the Render dashboard (Environment tab), never in git
+      - key: GNANI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: OTX_API_KEY
+        sync: false
+      - key: ABUSECH_AUTH_KEY
+        sync: false
+      - key: ABUSEIPDB_API_KEY
+        sync: false
+      - key: GREYNOISE_API_KEY
+        sync: false
+      - key: ASSETS
+        sync: false
